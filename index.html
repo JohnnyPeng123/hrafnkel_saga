@@ -1,0 +1,260 @@
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif
+        }
+
+        h1 {
+            background-color: #2a5599;
+            color: white;
+            padding: 5px;
+        }
+
+        svg {
+             border: 1px solid black;
+        }
+
+        .mainView {
+            display:flex;
+        }
+
+    </style>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alasql@0.6"></script>
+    
+</head>
+
+<body>
+      <svg id="main"></svg>
+</body>
+
+ <script> 
+    let data = {}
+    let graph = {}
+
+    function map_action(action) {
+      
+      if (action==0) {return 1}
+      else if (action==1) {return 1}
+      else if (action==2) {return 1}
+      else if (action==3) {return 1}
+      else if (action==4) {return 1}
+      else if (action==5) {return 1}
+      else if (action==6) {return 1}
+      else if (action==7) {return 1}
+      else if (action==8) {return 0}
+      else if (action==9) {return 1}
+      else if (action==10) {return 1}
+      else if (action==11) {return 1}
+      else if (action==12) {return 1}
+      else if (action==13) {return 1}
+      else if (action==14) {return -1}
+      else if (action==15) {return 0}
+      else if (action==16) {return -1}
+      else if (action==17) {return -1}
+      else if (action==18) {return -1}
+      else if (action==19) {return -1}
+      else if (action==20) {return -1}
+      else if (action==21) {return -1}
+      else if (action==22) {return -1}
+      else if (action==23) {return 0}
+      else if (action==24) {return -1}
+      else if (action==25) {return 0}
+      else if (action==26) {return 1}
+      else if (action==27) {return -1}
+      else if (action==28) {return 1}
+
+    }
+
+    function loadData() {
+        return Promise.all([
+            d3.csv("hrafnkel_nodes.csv"),
+            d3.csv("hrafnkel_edges.csv")
+        ]).then(datasets => {
+            data.nodes = datasets[0];
+            data.links = datasets[1];
+
+            const nodes = data.nodes.map(({id, label, gender}) => ({
+              id,
+              label,
+              sourceLinks: [],
+              targetLinks: [],
+              gender
+            }));
+
+            const nodeById = new Map(nodes.map(d => [d.id, d]));
+
+            const links = data.links.map(({source, target, action, chapter}) => ({
+              source: nodeById.get(source),
+              target: nodeById.get(target),
+              action: map_action(action),
+              chapter
+            }));
+
+            for (const link of links) {
+              const {source, target, action, chapter} = link;
+              source.sourceLinks.push(link);
+              target.targetLinks.push(link);
+            }
+
+            graph.nodes = nodes
+            graph.links = links
+
+            return graph;
+        })
+    }
+
+  loadData().then(main);      
+  
+  function main() {
+
+    let margin = ({top: 20, right: 20, bottom: 20, left: 250, between: 365, text_to_node: 100, between_y: 375})
+
+    function arc(d,i) {
+      c = Math.floor((i-1)/4)
+      const y1 = d.source.y + c*margin.between_y;
+      const y2 = d.target.y + c*margin.between_y;
+      const r = Math.abs(y2 - y1) / 2
+      return `M${margin.text_to_node+margin.left+margin.between*((i-1)%4)},${y1}A${r},${r} 0,0,${y1 < y2 ? 0 : 0} ${margin.text_to_node+margin.left+margin.between*((i-1)%4)},${y2}`;
+    }
+
+    function arc_color(d) {
+      if (d.action == -1) {return "#c81d25"}
+      else if (d.action == 0) {return "#aaa"}  
+      else if (d.action == 1) {return "#2a9134"}  
+    }
+
+    function count_nodes(arr) {
+      var a = [], b = [], c = {}, prev;
+
+      arr.sort();
+      for ( var i = 0; i < arr.length; i++ ) {
+          if ( arr[i] !== prev ) {
+              a.push(arr[i]);
+              b.push(1);
+          } else {
+              b[b.length-1]++;
+          }
+          prev = arr[i];
+      }
+
+      for (key in a) {
+        c[a[key]] = b[key] 
+      } 
+
+      return c;
+    }
+
+    const width = 1550
+    const height = 1500     
+    const svg = d3.select("#main")
+                  .attr("width", width) 
+                  .attr("height", height)
+
+    color = d3.scaleOrdinal(graph.nodes.map(d => d.chapter).sort(d3.ascending), d3.schemeCategory10)
+
+    svg.append("style").text(`
+
+      .hover path {
+        stroke: #ccc;
+      }
+
+      .hover text {
+        fill: #ccc;
+      }
+
+      .hover g.primary text {
+        fill: black;
+        font-weight: bold;
+      }
+
+      .hover g.secondary text {
+        fill: #333;
+      }
+
+      .hover path.primary {
+        stroke: #333;
+        stroke-opacity: 1;
+      }
+
+      `);
+
+    for (i=1; i < 17; i++) {
+      appeared_nodes = []
+      subset_links = graph.links.filter(links => +links.chapter === i)
+      for (idx in subset_links) {
+        appeared_nodes.push(subset_links[idx].source.id)
+        appeared_nodes.push(subset_links[idx].target.id) 
+      }
+
+      nodes_degree = count_nodes(appeared_nodes)
+      appeared_nodes = Object.keys(nodes_degree)
+
+      subset_nodes = graph.nodes.filter(nodes => appeared_nodes.includes(nodes.id))
+
+      max_num_character = d3.max(d3.map(graph.nodes,nodes => +nodes.id))
+
+      y = d3.scalePoint(subset_nodes.map(d => d.label).sort(d3.descending), [margin.top, 
+        (height - margin.bottom)/60*appeared_nodes.length])
+
+      y.domain(subset_nodes.sort((x,y) => d3.descending(nodes_degree[x.id], nodes_degree[y.id])).map(d => d.label));
+
+      labels = {}
+      
+      labels[`${"label" + i}`] = svg.append("g")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 15)
+        .attr("text-anchor", "end")
+        .selectAll("g")
+        .data(subset_nodes)
+        .join("g")
+        .attr("transform", d => `translate(${margin.left},${d.y = y(d.label)})`)
+        .call(g => g.append("text")
+            .attr("x", -6)
+            .attr("dy", "0.35em")
+            .attr("fill", d => d3.lab(color(d.gender)).darker(1))
+            .attr("transform", d => `translate(${margin.between*((i-1)%4)},${Math.floor((i-1)/4)*margin.between_y})`)
+            .text(d => d.label))
+        .call(g => g.append("circle")
+            .attr("r", 3)
+            .attr("fill", d => color(d.gender))
+            .attr("transform", d => `translate(${margin.text_to_node+margin.between*((i-1)%4)},${Math.floor((i-1)/4)*margin.between_y})`))
+
+      paths = {}
+      
+      paths[`${"path" + i}`] = svg.insert("g", "*")
+          .attr("fill", "none")
+          .attr("stroke-opacity", 0.6)
+          .attr("stroke-width", 1.5)
+          .selectAll("path")
+          .data(subset_links)
+          .join("path")
+          .attr("stroke", d => d3.lab(arc_color(d)).darker(1))
+          .attr("d", d => arc(d,i))
+
+
+      texts = {}
+
+      texts[`${"text" + i}`] = svg.append("g")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", 20)
+            .attr("text-anchor", "end")
+            .selectAll("g")
+            .data(subset_nodes.slice(0,1))
+            .join("g")
+            .call(g => g.append("text")
+                .attr("x", -6)
+                .attr("dy", "0.35em")
+                .attr("transform", d => `translate(${385+margin.between*((i-1)%4)},${320+Math.floor((i-1)/4)*margin.between_y})`)
+                .text(`${"Chapter "+i}`)
+                .attr("font-weight","bold"));
+
+
+    }
+  }
+
+ </script>
+
+</html>
