@@ -43,12 +43,14 @@ character in this chapter as the dots/nodes are sorted by degree.
 
 • (Strength) This visualization clearly shows most of the information given by the dataset at a very granular level,
 and all chapters were shown in once, so it is able to answers the following important questions very well:
+
 o Which characters were mentioned in chapter X? What is their gender? Which one of them is the most
 important character in this chapter? How is their relationship in this chapter (hostile/friendly/neutral)?
 What is the total number of chapters in this Saga?
 
 • (Weakness) Not all the given information was presented in this visualization, and this visualization cannot answer
 or directly answer some of the aggregation question. For Example:
+
 o How many times has character X has been mentioned in this book? Who is the most important character
 in this book? What is the exact action done by each character? At which chapter/page the character X
 was first mentioned?
