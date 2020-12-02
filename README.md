@@ -1,5 +1,6 @@
 # hrafnkel_saga
-View this visualization from the link below:
+View this visualization from:
+
 https://htmlpreview.github.io/?https://github.com/JohnnyPeng123/hrafnkel_saga/main/index.html
 
 ![alt text](https://github.com/JohnnyPeng123/hrafnkel_saga/blob/main/screen-shot.PNG?raw=true)
