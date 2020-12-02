@@ -2,11 +2,11 @@
 View this visualization from the link below:
 https://htmlpreview.github.io/?https://github.com/JohnnyPeng123/hrafnkel_saga/main/index.html
 
+![alt text](https://github.com/JohnnyPeng123/hrafnkel_saga/blob/main/screen-shot.PNG?raw=true)
+
 Data Source:
 
 http://mozart.diei.unipg.it/gdcontest/contest2020/topics.html
-
-![alt text](https://github.com/JohnnyPeng123/hrafnkel_saga/blob/main/screen-shot.PNG?raw=true)
 
 The implementation of the individual arc diagram in the graph was based on the codes from the link below:
 https://observablehq.com/@d3/arc-diagram#chart
