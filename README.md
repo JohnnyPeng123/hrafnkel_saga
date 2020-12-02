@@ -39,7 +39,7 @@ Einar. In chapter 5 of the original story, Hrafnkel truly killed Einar for ridin
 did not appeared again in the later chapters. Note that, this arc diagram also indicates Hrafnkel is the most important
 character in this chapter as the dots/nodes are sorted by degree.
 
-# Self-evaluation: 
+# Self-evaluation
 
 • (Strength) This visualization clearly shows most of the information given by the dataset at a very granular level,
 and all chapters were shown in once, so it is able to answers the following important questions very well:
